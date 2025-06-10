@@ -1,0 +1,183 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// 번역 테이블
+model Translation {
+  id        String   @id @default(cuid())
+  key       String   
+  language  String   
+  value     String   
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@unique([key, language])
+  @@map("translations")
+}
+
+// 사용자 테이블
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  role      String   @default("user")
+  language  String   @default("ko") // 사용자 언어 설정 추가
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  managedProducts Product[] @relation("ProductManager")
+
+  @@map("users")
+}
+
+// 고객 테이블
+model Customer {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  products Product[]
+
+  @@map("customers")
+}
+
+// 제품 테이블
+model Product {
+  id         String   @id @default(cuid())
+  name       String
+  customerId String   @map("customer_id")
+  managerId  String?  @map("manager_id")
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  customer          Customer                   @relation(fields: [customerId], references: [id])
+  manager           User?                      @relation("ProductManager", fields: [managerId], references: [id])
+  processes         Process[]
+  shippingStatus    ShippingStatus?
+  productionReqs    ProductionRequirement[]
+
+  @@map("products")
+}
+
+// 공정 테이블
+model Process {
+  id           String   @id @default(cuid())
+  name         String
+  productId    String   @map("product_id")
+  processOrder Int      @map("process_order")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  product        Product                 @relation(fields: [productId], references: [id])
+  productionReqs ProductionRequirement[]
+
+  @@map("processes")
+}
+
+// 설비 테이블
+model Equipment {
+  id              String   @id @default(cuid())
+  name            String
+  maxCapaPerDay   Int      @map("max_capa_per_day")
+  location        String?
+  operationCost   Decimal? @map("operation_cost")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  productionReqs ProductionRequirement[]
+
+  @@map("equipments")
+}
+
+// 원자재 테이블
+model RawMaterial {
+  id         String   @id @default(cuid())
+  name       String
+  unit       String
+  cost       Decimal
+  supplier   String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @updatedAt @map("updated_at")
+
+  // 관계
+  productionReqs ProductionRequirement[]
+
+  @@map("raw_materials")
+}
+
+// 생산 요구사항 테이블 (연결 테이블)
+model ProductionRequirement {
+  id          String @id @default(cuid())
+  productId   String @map("product_id")
+  processId   String @map("process_id")
+  equipmentId String @map("equipment_id")
+  materialId  String @map("material_id")
+  manCount    Int    @map("man_count")
+  quantity    Int    @default(1)
+
+  // 관계
+  product   Product     @relation(fields: [productId], references: [id])
+  process   Process     @relation(fields: [processId], references: [id])
+  equipment Equipment   @relation(fields: [equipmentId], references: [id])
+  material  RawMaterial @relation(fields: [materialId], references: [id])
+
+  @@map("production_requirements")
+}
+
+// 해상운송 상태 테이블
+model ShippingStatus {
+  id          String    @id @default(cuid())
+  productId   String    @unique @map("product_id")
+  status      String    @default("준비중")
+  etaDate     DateTime? @map("eta_date")
+  shippingDate DateTime? @map("shipping_date")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  // 관계
+  product Product @relation(fields: [productId], references: [id])
+
+  @@map("shipping_status")
+}
+
+// 제조원가 계산 테이블
+model CostCalculation {
+  id                String   @id @default(cuid())
+  productName       String   @map("product_name")
+  totalLaborCost    Decimal  @map("total_labor_cost")
+  equipmentCost     Decimal  @map("equipment_cost")
+  materialCost      Decimal  @map("material_cost")
+  dailyProduction   Int      @map("daily_production")
+  manufacturingCost Decimal  @map("manufacturing_cost")
+  createdAt         DateTime @default(now()) @map("created_at")
+
+  @@map("cost_calculations")
+}
+
+// 알림 테이블
+model Notification {
+  id        String   @id @default(cuid())
+  message   String
+  type      String   @default("info")
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("notifications")
+}
