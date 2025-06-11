@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { 
@@ -10,9 +10,11 @@ import {
   CubeIcon,
   CogIcon,
   TruckIcon,
-  BeakerIcon
+  BeakerIcon,
+  CalculatorIcon
 } from '@heroicons/react/24/outline'
 import toast, { Toaster } from 'react-hot-toast'
+import { useTranslation } from '@/contexts/TranslationContext'
 
 // 텍스트 타이핑 애니메이션 컴포넌트
 const TypeWriter = ({ text, delay = 0 }: { text: string; delay?: number }) => {
@@ -25,7 +27,7 @@ const TypeWriter = ({ text, delay = 0 }: { text: string; delay?: number }) => {
         setDisplayText(prev => prev + text[currentIndex])
         setCurrentIndex(prev => prev + 1)
       }
-    }, delay + currentIndex * 100)
+    }, delay + currentIndex * 40) // 타이핑 속도 빠르게 조정
 
     return () => clearTimeout(timer)
   }, [currentIndex, text, delay])
@@ -68,54 +70,109 @@ const FloatingParticle = ({ delay }: { delay: number }) => {
   )
 }
 
-// 기능 카드 컴포넌트
-const FeatureCard = ({ icon: Icon, title, description, delay }: {
+// 3D 효과 카드 컴포넌트
+const Feature3DCard = ({ icon: Icon, title, description, delay }: {
   icon: any
   title: string
   description: string
   delay: number
 }) => {
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [rotateX, setRotateX] = useState(0)
+  const [rotateY, setRotateY] = useState(0)
+  const [isHovered, setIsHovered] = useState(false)
+  
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return
+    
+    const card = cardRef.current
+    const rect = card.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    
+    const rotateXValue = (y - centerY) / 10
+    const rotateYValue = (centerX - x) / 10
+    
+    setRotateX(rotateXValue)
+    setRotateY(rotateYValue)
+  }
+  
+  const handleMouseLeave = () => {
+    setRotateX(0)
+    setRotateY(0)
+    setIsHovered(false)
+  }
+  
   return (
     <motion.div
-      initial={{ opacity: 0, y: 50, rotateY: -15 }}
-      animate={{ opacity: 1, y: 0, rotateY: 0 }}
+      ref={cardRef}
+      initial={{ opacity: 0, y: 50 }}
+      animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, delay }}
-      whileHover={{ 
-        scale: 1.05, 
-        rotateY: 5,
-        boxShadow: "0 25px 50px rgba(255,255,255,0.1)"
+      style={{ 
+        transform: `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg)`,
+        transformStyle: 'preserve-3d'
       }}
+      onMouseMove={handleMouseMove}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
       className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 text-white relative overflow-hidden group"
     >
-      {/* 호버 시 배경 효과 */}
+      {/* 호버 시 그라데이션 효과 */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
-        initial={false}
+        animate={{ opacity: isHovered ? 0.2 : 0 }}
+        className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 transition-opacity duration-300"
       />
       
+      {/* 호버 시 파티클 효과 */}
+      {isHovered && (
+        <>
+          {[...Array(10)].map((_, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0, x: '50%', y: '50%' }}
+              animate={{ 
+                opacity: [0, 0.8, 0],
+                scale: [0, 1, 0],
+                x: `${50 + Math.random() * 50 * (Math.random() > 0.5 ? 1 : -1)}%`,
+                y: `${50 + Math.random() * 50 * (Math.random() > 0.5 ? 1 : -1)}%`
+              }}
+              transition={{ duration: 1, delay: i * 0.1 }}
+              className="absolute w-1 h-1 bg-white rounded-full"
+            />
+          ))}
+        </>
+      )}
+      
       <motion.div
+        style={{ transform: 'translateZ(20px)' }}
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.5, delay: delay + 0.2 }}
-        className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6 mx-auto"
+        className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6 mx-auto relative z-10"
       >
         <Icon className="w-8 h-8 text-white" />
       </motion.div>
       
       <motion.h3
+        style={{ transform: 'translateZ(30px)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: delay + 0.4 }}
-        className="text-xl font-bold mb-4 text-center"
+        className="text-xl font-bold mb-4 text-center relative z-10"
       >
         {title}
       </motion.h3>
       
       <motion.p
+        style={{ transform: 'translateZ(20px)' }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: delay + 0.6 }}
-        className="text-white font-medium text-center leading-relaxed"
+        className="text-white font-medium text-center leading-relaxed relative z-10"
       >
         {description}
       </motion.p>
@@ -124,18 +181,11 @@ const FeatureCard = ({ icon: Icon, title, description, delay }: {
 }
 
 export default function Home() {
+  const { t, language, setLanguage } = useTranslation()
   const [showContent, setShowContent] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
-  const [language, setLanguage] = useState('ko') // 초기 언어 설정: 한국어
-  const [isLanguageOpen, setIsLanguageOpen] = useState(false) // 언어 드롭다운 열림/닫힘 상태
-
-  // 언어 변경 핸들러
-  const handleLanguageChange = (lang: string) => {
-    setLanguage(lang)
-    setIsLanguageOpen(false)
-    toast.success(`언어가 ${lang === 'ko' ? '한국어' : lang === 'th' ? '태국어' : '영어'}로 변경되었습니다`)
-  }
-
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false)
+  
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 500)
     return () => clearTimeout(timer)
@@ -149,6 +199,12 @@ export default function Home() {
     }, 2000)
     return () => clearInterval(interval)
   }, [])
+  
+  const handleLanguageChange = (lang: 'ko' | 'th' | 'en') => {
+    setLanguage(lang)
+    setIsLanguageOpen(false)
+    toast.success(`언어가 ${lang === 'ko' ? '한국어' : lang === 'th' ? '태국어' : '영어'}로 변경되었습니다`)
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 relative overflow-hidden">
@@ -198,296 +254,203 @@ export default function Home() {
       <div className="absolute inset-0 overflow-hidden">
         {/* 메인 그라데이션 볼들 */}
         <motion.div
-          className="absolute -top-40 -right-40 w-96 h-96 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(59,130,246,0.6) 0%, rgba(147,51,234,0.4) 50%, transparent 100%)'
-          }}
+          className="absolute top-[20%] left-[10%] w-[500px] h-[500px] rounded-full bg-blue-600 opacity-30 filter blur-[100px]"
           animate={{
-            x: [0, 150, 0],
-            y: [0, -100, 0],
-            scale: [1, 1.2, 1]
+            scale: [1, 1.2, 1],
+            x: [0, -20, 0],
+            y: [0, -20, 0],
           }}
           transition={{
-            duration: 20,
+            duration: 10,
             repeat: Infinity,
             repeatType: "reverse",
           }}
         />
         
         <motion.div
-          className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(236,72,153,0.6) 0%, rgba(59,130,246,0.4) 50%, transparent 100%)'
-          }}
+          className="absolute bottom-[10%] right-[5%] w-[600px] h-[600px] rounded-full bg-purple-600 opacity-30 filter blur-[100px]"
           animate={{
-            x: [0, -100, 0],
-            y: [0, 150, 0],
-            scale: [1, 1.3, 1]
+            scale: [1, 1.1, 1],
+            x: [0, 20, 0],
+            y: [0, 20, 0],
           }}
           transition={{
-            duration: 25,
+            duration: 12,
             repeat: Infinity,
             repeatType: "reverse",
           }}
         />
-
+        
         <motion.div
-          className="absolute top-1/2 left-1/2 w-80 h-80 rounded-full"
-          style={{
-            background: 'radial-gradient(circle, rgba(168,85,247,0.4) 0%, rgba(59,130,246,0.3) 50%, transparent 100%)'
-          }}
+          className="absolute top-[50%] left-[50%] w-[400px] h-[400px] rounded-full bg-indigo-600 opacity-20 filter blur-[100px]"
           animate={{
-            x: [0, -80, 0],
-            y: [0, 80, 0],
-            rotate: [0, 360]
+            scale: [1, 1.3, 1],
+            x: [0, 30, 0],
+            y: [0, -30, 0],
           }}
           transition={{
-            duration: 30,
+            duration: 15,
             repeat: Infinity,
             repeatType: "reverse",
           }}
         />
-
+        
         {/* 떠다니는 파티클들 */}
-        {Array.from({ length: 20 }).map((_, i) => (
+        {Array.from({ length: 30 }).map((_, i) => (
           <FloatingParticle key={i} delay={i * 0.2} />
         ))}
-
-        {/* 격자 패턴 */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="w-full h-full" style={{
-            backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.3) 1px, transparent 0)',
-            backgroundSize: '50px 50px'
-          }} />
-        </div>
+        
+        {/* 미세한 별빛 효과 */}
+        {Array.from({ length: 100 }).map((_, i) => (
+          <motion.div
+            key={`star-${i}`}
+            className="absolute bg-white rounded-full"
+            style={{
+              width: Math.random() * 2 + 1 + 'px',
+              height: Math.random() * 2 + 1 + 'px',
+              left: Math.random() * 100 + '%',
+              top: Math.random() * 100 + '%',
+            }}
+            animate={{
+              opacity: [0.2, 0.8, 0.2],
+              scale: [1, 1.2, 1],
+            }}
+            transition={{
+              duration: Math.random() * 3 + 2,
+              repeat: Infinity,
+              delay: Math.random() * 5,
+            }}
+          />
+        ))}
       </div>
-
-      {/* 메인 콘텐츠 */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 text-center">
-        <AnimatePresence>
-          {showContent && (
+      
+      <AnimatePresence>
+        {showContent && (
+          <div className="relative z-10 pt-20 pb-32 px-6 mx-auto max-w-7xl">
+            {/* 헤더 및 메인 콘텐츠 */}
+            <div className="text-center mb-20">
+              <motion.div
+                initial={{ opacity: 0, y: -50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8 }}
+              >
+                <motion.h1 
+                  className="text-5xl md:text-7xl font-bold text-white mb-6"
+                  style={{ 
+                    WebkitTextFillColor: 'white',
+                    backgroundClip: 'text',
+                    WebkitBackgroundClip: 'text',
+                  }}
+                >
+                  {t('app_name')}
+                </motion.h1>
+                
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.4, duration: 0.8 }}
+                  className="text-xl md:text-2xl text-blue-200 max-w-3xl mx-auto mb-8"
+                >
+                  <TypeWriter text={t('intro_subtitle')} delay={800} />
+                </motion.div>
+                
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1, duration: 0.5 }}
+                  className="mt-12 mb-6 flex flex-col md:flex-row gap-4 justify-center"
+                >
+                  <Link href="/login">
+                    <motion.button
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transform transition-all duration-300 flex items-center justify-center"
+                    >
+                      <span>{t('get_started')}</span>
+                      <ArrowRightIcon className="w-5 h-5 ml-2" />
+                    </motion.button>
+                  </Link>
+                  
+                  <Link href="/dashboard">
+                    <motion.button
+                      whileHover={{ scale: 1.05, y: -5 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="px-8 py-4 bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 text-white font-semibold rounded-lg hover:bg-opacity-20 transform transition-all duration-300"
+                    >
+                      {t('dashboard')}
+                    </motion.button>
+                  </Link>
+                </motion.div>
+                
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.5, duration: 0.8 }}
+                  className="text-lg text-blue-200 max-w-2xl mx-auto"
+                >
+                  <span className="text-white font-semibold">{steps[currentStep]}</span>
+                  <motion.span
+                    key={currentStep}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5 }}
+                  >
+                    {" → "}
+                  </motion.span>
+                </motion.div>
+              </motion.div>
+            </div>
+            
+            {/* 주요 기능 */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="max-w-6xl mx-auto"
+              transition={{ delay: 1.8, duration: 1 }}
+              className="grid grid-cols-1 md:grid-cols-3 gap-8"
             >
-              {/* 로고 영역 */}
-              <motion.div
-                initial={{ scale: 0, rotate: -180 }}
-                animate={{ scale: 1, rotate: 0 }}
-                transition={{ 
-                  type: "spring",
-                  stiffness: 260,
-                  damping: 20,
-                  delay: 0.2 
-                }}
-                className="mb-12"
-              >
-                <motion.div 
-                  className="inline-flex items-center justify-center w-32 h-32 bg-white bg-opacity-20 rounded-full backdrop-blur-sm mb-8 relative"
-                  animate={{
-                    boxShadow: [
-                      "0 0 0 0 rgba(255,255,255,0.4)",
-                      "0 0 0 30px rgba(255,255,255,0)",
-                      "0 0 0 0 rgba(255,255,255,0)"
-                    ]
-                  }}
-                  transition={{
-                    duration: 2,
-                    repeat: Infinity,
-                    repeatDelay: 1
-                  }}
-                >
-                  <motion.div
-                    animate={{ rotate: 360 }}
-                    transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-                  >
-                    <GlobeAsiaAustraliaIcon className="w-16 h-16 text-white" />
-                  </motion.div>
-                  
-                  {/* 주변 회전하는 아이콘들 */}
-                  {[CubeIcon, CogIcon, TruckIcon, BeakerIcon].map((Icon, index) => (
-                    <motion.div
-                      key={index}
-                      className="absolute w-8 h-8 text-white"
-                      animate={{
-                        rotate: 360,
-                        x: [0, 60 * Math.cos(index * Math.PI/2), 0],
-                        y: [0, 60 * Math.sin(index * Math.PI/2), 0]
-                      }}
-                      transition={{
-                        duration: 8,
-                        repeat: Infinity,
-                        ease: "linear",
-                        delay: index * 0.5
-                      }}
-                    >
-                      <Icon className="w-6 h-6" />
-                    </motion.div>
-                  ))}
-                </motion.div>
-              </motion.div>
-
-              {/* 메인 제목 */}
-              <motion.h1
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.6 }}
-                className="text-6xl md:text-8xl font-bold text-white mb-8 leading-tight"
-              >
-                <motion.span
-                  animate={{ 
-                    backgroundPosition: ["0% 50%", "100% 50%", "0% 50%"],
-                  }}
-                  transition={{ duration: 5, repeat: Infinity }}
-                  style={{
-                    background: "linear-gradient(45deg, #fff, #60a5fa, #a855f7, #fff)",
-                    backgroundSize: "400% 400%",
-                    WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "white",
-                    color: "white",
-                    backgroundClip: "text"
-                  }}
-                >
-                  태국 이관 시스템
-                </motion.span>
-              </motion.h1>
-
-              {/* 동적 워크플로우 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.0 }}
-                className="text-2xl md:text-4xl text-blue-100 mb-4"
-              >
-                <div className="flex items-center justify-center space-x-4 flex-wrap">
-                  {steps.map((step, index) => (
-                    <motion.span
-                      key={step}
-                      className={`px-4 py-2 rounded-full transition-all duration-500 ${
-                        currentStep === index 
-                          ? 'bg-white text-blue-900 shadow-lg scale-110 font-bold' 
-                          : 'bg-white bg-opacity-20 text-white font-semibold'
-                      }`}
-                      animate={currentStep === index ? {
-                        scale: [1, 1.1, 1],
-                        boxShadow: ["0 0 0 0 rgba(255,255,255,0.7)", "0 0 0 20px rgba(255,255,255,0)", "0 0 0 0 rgba(255,255,255,0)"]
-                      } : {}}
-                      transition={{ duration: 0.6 }}
-                    >
-                      {step}
-                    </motion.span>
-                  ))}
-                </div>
-              </motion.div>
-
-              {/* 부제목 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.2 }}
-                className="text-xl md:text-2xl text-white font-semibold mb-16"
-              >
-                <TypeWriter 
-                  text="체계적인 제품 관리로 완벽한 이관 프로세스를 구현합니다" 
-                  delay={1500}
-                />
-              </motion.div>
-
-              {/* 기능 카드들 */}
-              <motion.div
-                initial={{ opacity: 0, y: 50 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 1.8 }}
-                className="grid md:grid-cols-3 gap-8 mb-16 max-w-5xl mx-auto"
-              >
-                <FeatureCard
-                  icon={SparklesIcon}
-                  title="실시간 추적"
-                  description="제품별 공정 현황과 해상운송 상태를 실시간으로 모니터링하고 분석합니다"
-                  delay={2.0}
-                />
-                <FeatureCard
-                  icon={CubeIcon}
-                  title="원가 계산"
-                  description="인건비, 설비비, 원자재비를 포함한 정확한 제조원가를 자동으로 산출합니다"
-                  delay={2.2}
-                />
-                <FeatureCard
-                  icon={TruckIcon}
-                  title="통합 관리"
-                  description="고객부터 원자재까지 전 과정을 하나의 시스템으로 체계적으로 관리합니다"
-                  delay={2.4}
-                />
-              </motion.div>
-
-              {/* CTA 버튼들 */}
-              <motion.div
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 2.6 }}
-                className="space-y-4 sm:space-y-0 sm:space-x-6 sm:flex sm:justify-center"
-              >
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Link
-                    href="/login"
-                    className="inline-flex items-center justify-center px-12 py-4 text-xl font-bold text-blue-900 bg-white rounded-full hover:bg-blue-50 transition-all duration-300 shadow-2xl group relative overflow-hidden"
-                  >
-                    <motion.div
-                      className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"
-                      initial={false}
-                    />
-                    <span className="relative z-10">시작하기</span>
-                    <motion.div
-                      animate={{ x: [0, 5, 0] }}
-                      transition={{ duration: 1.5, repeat: Infinity }}
-                      className="relative z-10"
-                    >
-                      <ArrowRightIcon className="w-6 h-6 ml-3" />
-                    </motion.div>
-                  </Link>
-                </motion.div>
-
-                <motion.div
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <Link
-                    href="/dashboard"
-                    className="inline-flex items-center justify-center px-12 py-4 text-xl font-bold text-white border-2 border-white border-opacity-50 rounded-full hover:bg-white hover:bg-opacity-10 transition-all duration-300 backdrop-blur-sm relative overflow-hidden group"
-                  >
-                    <motion.div
-                      className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 transition-opacity duration-300"
-                      initial={false}
-                    />
-                    <span className="relative z-10">대시보드 보기</span>
-                  </Link>
-                </motion.div>
-              </motion.div>
+              <Feature3DCard 
+                icon={GlobeAsiaAustraliaIcon} 
+                title={t('feature_realtime_tracking')} 
+                description={t('feature_realtime_desc')} 
+                delay={0}
+              />
+              
+              <Feature3DCard 
+                icon={CalculatorIcon} 
+                title={t('feature_cost_calculation')} 
+                description={t('feature_cost_desc')} 
+                delay={0.2}
+              />
+              
+              <Feature3DCard 
+                icon={CubeIcon} 
+                title={t('feature_integrated_management')} 
+                description={t('feature_integrated_desc')} 
+                delay={0.4}
+              />
             </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* 하단 정보 */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 3.0 }}
-          className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center"
-        >
-          <motion.p 
-            className="text-white text-sm font-medium"
-            animate={{ opacity: [0.5, 1, 0.5] }}
-            transition={{ duration: 3, repeat: Infinity }}
-          >
-            © 2024 태국 이관 제품 관리 시스템. 모든 권리 보유.
-          </motion.p>
-        </motion.div>
-      </div>
+            
+            {/* 하단 버튼 */}
+            <motion.div
+              initial={{ opacity: 0, y: 50 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 2.2, duration: 0.8 }}
+              className="flex justify-center mt-16"
+            >
+              <Link href="/login">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  className="bg-white bg-opacity-10 backdrop-blur-sm rounded-full p-6 border border-white border-opacity-20 shadow-xl hover:shadow-2xl transform transition-all duration-300"
+                >
+                  <ArrowRightIcon className="w-8 h-8 text-white" />
+                </motion.button>
+              </Link>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
