@@ -27,58 +27,58 @@ export default function DashboardPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">대시보드를 불러오는 중...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+          <p className="mt-4 text-white font-medium">대시보드를 불러오는 중...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-50">
       <Toaster position="top-center" />
       
       {/* 사이드바 */}
       <div className="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg">
         <div className="flex flex-col h-full">
           {/* 로고 */}
-          <div className="flex items-center justify-center h-16 bg-blue-600 text-white">
+          <div className="flex items-center justify-center h-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
             <h1 className="text-xl font-bold">태국 이관 시스템</h1>
           </div>
 
           {/* 메뉴 */}
           <nav className="flex-1 px-4 py-6 space-y-2">
-            <Link href="/dashboard" className="flex items-center px-4 py-2 bg-blue-50 text-blue-600 rounded-lg">
+            <Link href="/dashboard" className="flex items-center px-4 py-2 bg-blue-100 text-blue-700 font-medium rounded-lg transition-all duration-200 shadow-sm">
               <HomeIcon className="w-5 h-5 mr-3" />
               대시보드
             </Link>
-            <Link href="/customers" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+            <Link href="/customers" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
               <UserGroupIcon className="w-5 h-5 mr-3" />
               고객 관리
             </Link>
-            <Link href="/products" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+            <Link href="/products" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
               <CubeIcon className="w-5 h-5 mr-3" />
               제품 관리
             </Link>
-            <Link href="/processes" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+            <Link href="/processes" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
               <CogIcon className="w-5 h-5 mr-3" />
               공정 관리
             </Link>
-            <Link href="/equipments" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+            <Link href="/equipments" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
               <BeakerIcon className="w-5 h-5 mr-3" />
               설비 관리
             </Link>
-            <Link href="/materials" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+            <Link href="/materials" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
               <TruckIcon className="w-5 h-5 mr-3" />
               원자재 관리
             </Link>
-            <Link href="/costs" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+            <Link href="/costs" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
               <CalculatorIcon className="w-5 h-5 mr-3" />
               원가 계산
             </Link>
-            <Link href="/admin" className="flex items-center px-4 py-2 text-gray-600 hover:bg-gray-50 rounded-lg">
+            <Link href="/admin" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
               <ChartBarIcon className="w-5 h-5 mr-3" />
               관리자 패널
             </Link>
@@ -90,8 +90,8 @@ export default function DashboardPage() {
       <div className="ml-64 p-8">
         {/* 헤더 */}
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">대시보드</h1>
-          <p className="text-gray-600">태국 이관 제품 관리 시스템 전체 현황</p>
+          <h1 className="text-3xl font-bold text-blue-900 mb-2">대시보드</h1>
+          <p className="text-blue-700 font-medium">태국 이관 제품 관리 시스템 전체 현황</p>
         </div>
 
         {/* 통계 카드 */}
@@ -100,7 +100,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white p-6 rounded-lg shadow-sm border"
+            className="bg-white p-6 rounded-lg shadow-md border border-blue-100 hover:shadow-lg transition-shadow duration-300"
           >
             <div className="flex items-center">
               <div className="p-3 bg-blue-100 rounded-lg">
@@ -117,7 +117,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white p-6 rounded-lg shadow-sm border"
+            className="bg-white p-6 rounded-lg shadow-md border border-blue-100 hover:shadow-lg transition-shadow duration-300"
           >
             <div className="flex items-center">
               <div className="p-3 bg-green-100 rounded-lg">
@@ -134,7 +134,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="bg-white p-6 rounded-lg shadow-sm border"
+            className="bg-white p-6 rounded-lg shadow-md border border-blue-100 hover:shadow-lg transition-shadow duration-300"
           >
             <div className="flex items-center">
               <div className="p-3 bg-yellow-100 rounded-lg">
@@ -151,7 +151,7 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
-            className="bg-white p-6 rounded-lg shadow-sm border"
+            className="bg-white p-6 rounded-lg shadow-md border border-blue-100 hover:shadow-lg transition-shadow duration-300"
           >
             <div className="flex items-center">
               <div className="p-3 bg-red-100 rounded-lg">
@@ -172,14 +172,14 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
-            className="bg-white rounded-lg shadow-sm border"
+            className="bg-white rounded-lg shadow-md border border-blue-100 hover:shadow-lg transition-shadow duration-300"
           >
             <div className="p-6 border-b">
               <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold text-gray-900">제품 현황</h2>
+                <h2 className="text-lg font-semibold text-blue-900">제품 현황</h2>
                 <Link
                   href="/products/create"
-                  className="inline-flex items-center px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-blue-600 to-indigo-700 text-white text-sm rounded-lg hover:from-blue-700 hover:to-indigo-800 transition-colors shadow-sm"
                 >
                   <PlusIcon className="w-4 h-4 mr-1" />
                   새 제품
@@ -188,37 +188,37 @@ export default function DashboardPage() {
             </div>
             <div className="p-6">
               <div className="space-y-4">
-                <div className="border border-gray-200 rounded-lg p-4">
+                <div className="border border-blue-100 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">스마트폰 케이스</h3>
-                      <p className="text-sm text-gray-500">고객: 삼성전자</p>
-                      <p className="text-sm text-gray-500">공정: 3개</p>
+                      <h3 className="font-semibold text-blue-900">스마트폰 케이스</h3>
+                      <p className="text-sm text-blue-700">고객: 삼성전자</p>
+                      <p className="text-sm text-blue-700">공정: 3개</p>
                     </div>
                     <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
                       운송중
                     </span>
                   </div>
                   <div className="mt-3">
-                    <Link href="/products/1" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <Link href="/products/1" className="text-blue-600 hover:text-blue-800 text-sm font-semibold">
                       상세 보기 →
                     </Link>
                   </div>
                 </div>
                 
-                <div className="border border-gray-200 rounded-lg p-4">
+                <div className="border border-blue-100 rounded-lg p-4 hover:shadow-md transition-shadow duration-300">
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
-                      <h3 className="font-medium text-gray-900">자동차 부품</h3>
-                      <p className="text-sm text-gray-500">고객: 현대자동차</p>
-                      <p className="text-sm text-gray-500">공정: 5개</p>
+                      <h3 className="font-semibold text-blue-900">자동차 부품</h3>
+                      <p className="text-sm text-blue-700">고객: 현대자동차</p>
+                      <p className="text-sm text-blue-700">공정: 5개</p>
                     </div>
                     <span className="inline-flex px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
                       준비중
                     </span>
                   </div>
                   <div className="mt-3">
-                    <Link href="/products/2" className="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                    <Link href="/products/2" className="text-blue-600 hover:text-blue-800 text-sm font-semibold">
                       상세 보기 →
                     </Link>
                   </div>
@@ -232,10 +232,10 @@ export default function DashboardPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.6 }}
-            className="bg-white rounded-lg shadow-sm border"
+            className="bg-white rounded-lg shadow-md border border-blue-100 hover:shadow-lg transition-shadow duration-300"
           >
             <div className="p-6 border-b">
-              <h2 className="text-lg font-semibold text-gray-900">최근 알림</h2>
+              <h2 className="text-lg font-semibold text-blue-900">최근 알림</h2>
             </div>
             <div className="p-6">
               <div className="space-y-4">
@@ -244,7 +244,7 @@ export default function DashboardPage() {
                     <BellIcon className="w-4 h-4 text-gray-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-900 font-medium">
+                    <p className="text-sm text-blue-900 font-semibold">
                       🆕 admin님이 새로운 제품을 등록했습니다: 스마트폰 케이스
                     </p>
                   </div>
@@ -255,7 +255,7 @@ export default function DashboardPage() {
                     <BellIcon className="w-4 h-4 text-gray-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-blue-700">
                       📦 제품 상태 변경: 자동차 부품 → 운송중
                     </p>
                   </div>
@@ -266,7 +266,7 @@ export default function DashboardPage() {
                     <BellIcon className="w-4 h-4 text-gray-400" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-blue-700">
                       🆕 user님이 새로운 공정을 등록했습니다: 마감 처리
                     </p>
                   </div>
