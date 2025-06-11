@@ -114,7 +114,7 @@ const FeatureCard = ({ icon: Icon, title, description, delay }: {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: delay + 0.6 }}
-        className="text-blue-100 text-center leading-relaxed"
+        className="text-white font-medium text-center leading-relaxed"
       >
         {description}
       </motion.p>
@@ -293,7 +293,8 @@ export default function Home() {
                     background: "linear-gradient(45deg, #fff, #60a5fa, #a855f7, #fff)",
                     backgroundSize: "400% 400%",
                     WebkitBackgroundClip: "text",
-                    WebkitTextFillColor: "transparent",
+                    WebkitTextFillColor: "white",
+                    color: "white",
                     backgroundClip: "text"
                   }}
                 >
@@ -314,8 +315,8 @@ export default function Home() {
                       key={step}
                       className={`px-4 py-2 rounded-full transition-all duration-500 ${
                         currentStep === index 
-                          ? 'bg-white text-blue-900 shadow-lg scale-110' 
-                          : 'bg-white bg-opacity-20 text-white'
+                          ? 'bg-white text-blue-900 shadow-lg scale-110 font-bold' 
+                          : 'bg-white bg-opacity-20 text-white font-semibold'
                       }`}
                       animate={currentStep === index ? {
                         scale: [1, 1.1, 1],
@@ -334,7 +335,7 @@ export default function Home() {
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: 1.2 }}
-                className="text-xl md:text-2xl text-blue-200 mb-16"
+                className="text-xl md:text-2xl text-white font-semibold mb-16"
               >
                 <TypeWriter 
                   text="체계적인 제품 관리로 완벽한 이관 프로세스를 구현합니다" 
@@ -427,7 +428,7 @@ export default function Home() {
           className="absolute bottom-8 left-1/2 transform -translate-x-1/2 text-center"
         >
           <motion.p 
-            className="text-blue-200 text-sm"
+            className="text-white text-sm font-medium"
             animate={{ opacity: [0.5, 1, 0.5] }}
             transition={{ duration: 3, repeat: Infinity }}
           >
