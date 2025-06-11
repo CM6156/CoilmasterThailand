@@ -92,8 +92,11 @@ export default function DashboardPage() {
   const getInitials = () => {
     if (!user) return '';
     
-    if (user.name && user.name.length > 0) {
-      return user.name.charAt(0).toUpperCase();
+    if (user.nickname && user.nickname.length > 0) {
+      return user.nickname.charAt(0).toUpperCase();
+    }
+    if (user.firstName && user.firstName.length > 0) {
+      return user.firstName.charAt(0).toUpperCase();
     }
     if (user.username && user.username.length > 0) {
       return user.username.charAt(0).toUpperCase();
@@ -120,7 +123,7 @@ export default function DashboardPage() {
                 {getInitials()}
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-900">{user?.name || user?.username}</div>
+                <div className="text-sm font-medium text-gray-900">{user?.nickname || user?.username}</div>
                 <div className="text-xs text-gray-500">{user?.email}</div>
               </div>
             </div>
@@ -182,7 +185,7 @@ export default function DashboardPage() {
         {/* 헤더 */}
         <div className="flex justify-between items-center p-4 border-b border-gray-100">
           <div className="flex items-center">
-            <span className="text-gray-700 font-medium">{t('welcome')}, {user?.name || user?.username}!</span>
+            <span className="text-gray-700 font-medium">{t('welcome')}, {user?.nickname || user?.username}!</span>
             {user?.role === 'admin' && (
               <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
                 관리자
@@ -242,7 +245,7 @@ export default function DashboardPage() {
                 {getInitials()}
               </div>
               <div className="mt-4 md:mt-0">
-                <h2 className="text-2xl font-bold text-blue-900">{user?.name || capitalizeFirstLetter(user?.username || '')}</h2>
+                <h2 className="text-2xl font-bold text-blue-900">{user?.nickname || capitalizeFirstLetter(user?.username || '')}</h2>
                 <p className="text-blue-700">{user?.email}</p>
                 <p className="text-sm text-gray-500 mt-1">역할: {user?.role === 'admin' ? '관리자' : '일반 사용자'}</p>
                 <div className="mt-4 flex space-x-2">
@@ -256,7 +259,7 @@ export default function DashboardPage() {
               </div>
               <div className="md:ml-auto mt-4 md:mt-0 flex flex-col items-end">
                 <div className="text-sm text-gray-500">마지막 로그인</div>
-                <div className="text-blue-700 font-medium">{new Date().toLocaleDateString()}</div>
+                <div className="text-blue-700 font-medium">{user?.lastLogin ? new Date(user.lastLogin).toLocaleString() : new Date().toLocaleDateString()}</div>
               </div>
             </div>
           </motion.div>
@@ -417,7 +420,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-blue-900 font-semibold">
-                        🆕 {user?.name || user?.username}님이 새로운 제품을 등록했습니다: 스마트폰 케이스
+                        🆕 {user?.nickname || user?.username}님이 새로운 제품을 등록했습니다: 스마트폰 케이스
                       </p>
                     </div>
                   </div>

@@ -4,14 +4,68 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { EyeIcon, EyeSlashIcon, UserIcon, LockClosedIcon, UserPlusIcon } from '@heroicons/react/24/outline'
+import { 
+  EyeIcon, 
+  EyeSlashIcon, 
+  UserIcon, 
+  LockClosedIcon, 
+  UserPlusIcon,
+  EnvelopeIcon,
+  IdentificationIcon
+} from '@heroicons/react/24/outline'
 import toast, { Toaster } from 'react-hot-toast'
 import { useTranslation } from '@/contexts/TranslationContext'
+import { useAuth } from '@/contexts/AuthContext'
+
+// 비밀번호 강도 측정 함수
+const measurePasswordStrength = (password: string): number => {
+  if (!password) return 0;
+  
+  let strength = 0;
+  
+  // 길이 점수
+  if (password.length >= 8) strength += 1;
+  if (password.length >= 12) strength += 1;
+  
+  // 복잡성 점수
+  if (/[A-Z]/.test(password)) strength += 1; // 대문자
+  if (/[a-z]/.test(password)) strength += 1; // 소문자
+  if (/[0-9]/.test(password)) strength += 1; // 숫자
+  if (/[^A-Za-z0-9]/.test(password)) strength += 1; // 특수문자
+  
+  // 0-5 범위로 정규화
+  return Math.min(5, strength);
+};
+
+// 비밀번호 강도에 따른 색상
+const strengthColors = [
+  'bg-red-500',       // 매우 약함 (0)
+  'bg-orange-500',    // 약함 (1)
+  'bg-yellow-500',    // 보통 (2)
+  'bg-lime-500',      // 강함 (3)
+  'bg-green-500',     // 매우 강함 (4)
+  'bg-emerald-500'    // 최상 (5)
+];
+
+// 비밀번호 강도에 따른 텍스트
+const strengthTexts = [
+  '매우 약함',
+  '약함',
+  '보통',
+  '강함',
+  '매우 강함',
+  '최상'
+];
 
 export default function SignupPage() {
   const { t, language, setLanguage } = useTranslation()
+  const { register } = useAuth()
   const [formData, setFormData] = useState({
     username: '',
+    nickname: '',
+    firstName: '',
+    lastName: '',
+    email: '',
     password: '',
     confirmPassword: ''
   })
@@ -20,6 +74,7 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
   const [particles, setParticles] = useState<React.ReactNode[]>([])
+  const [passwordStrength, setPasswordStrength] = useState(0)
   const router = useRouter()
   
   useEffect(() => {
@@ -59,6 +114,11 @@ export default function SignupPage() {
     return () => document.body.classList.remove('signup-animation-active')
   }, [])
 
+  // 비밀번호 변경 시 강도 측정
+  useEffect(() => {
+    setPasswordStrength(measurePasswordStrength(formData.password));
+  }, [formData.password]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
@@ -76,6 +136,21 @@ export default function SignupPage() {
     e.preventDefault()
     setIsLoading(true)
 
+    // 필수 필드 확인
+    if (!formData.username || !formData.nickname || !formData.email || !formData.password) {
+      toast.error('모든 필수 항목을 입력해주세요.')
+      setIsLoading(false)
+      return
+    }
+
+    // 이메일 형식 확인
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(formData.email)) {
+      toast.error('유효한 이메일 주소를 입력해주세요.')
+      setIsLoading(false)
+      return
+    }
+
     // 비밀번호 확인
     if (formData.password !== formData.confirmPassword) {
       toast.error(t('password_mismatch'))
@@ -83,34 +158,37 @@ export default function SignupPage() {
       return
     }
 
-    // 비밀번호 길이 확인
+    // 비밀번호 길이 및 강도 확인
     if (formData.password.length < 6) {
       toast.error('비밀번호는 최소 6자 이상이어야 합니다.')
       setIsLoading(false)
       return
     }
 
+    if (passwordStrength < 2) {
+      toast.error('더 강력한 비밀번호를 사용해주세요.')
+      setIsLoading(false)
+      return
+    }
+
     try {
-      const response = await fetch('/api/auth/signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          password: formData.password
-        }),
+      // AuthContext의 register 함수 사용
+      const success = await register({
+        username: formData.username,
+        nickname: formData.nickname,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password
       })
 
-      const data = await response.json()
-
-      if (response.ok) {
+      if (success) {
         toast.success('회원가입이 완료되었습니다!')
         setTimeout(() => {
           router.push('/login')
         }, 1500)
       } else {
-        toast.error(data.error || '회원가입에 실패했습니다.')
+        toast.error('회원가입에 실패했습니다.')
       }
     } catch (error) {
       toast.error('네트워크 오류가 발생했습니다.')
@@ -204,7 +282,7 @@ export default function SignupPage() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -50 }}
           transition={{ duration: 0.8 }}
-          className="max-w-md w-full z-10"
+          className="max-w-xl w-full z-10"
         >
           {/* 로고 영역 */}
           <div className="text-center mb-8">
@@ -251,7 +329,7 @@ export default function SignupPage() {
             transition={{ duration: 0.8, delay: 0.4 }}
             className="bg-purple-900 bg-opacity-50 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-purple-400 border-opacity-30"
           >
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* 아이디 입력 */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
@@ -259,7 +337,7 @@ export default function SignupPage() {
                 transition={{ duration: 0.5, delay: 0.5 }}
               >
                 <label htmlFor="username" className="block text-sm font-medium text-white mb-2">
-                  {t('username')}
+                  아이디 <span className="text-red-300">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -271,9 +349,102 @@ export default function SignupPage() {
                     required
                     minLength={3}
                     className="w-full pl-12 pr-4 py-3 bg-purple-800 bg-opacity-50 border border-purple-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
-                    placeholder={t('username_min')}
+                    placeholder="로그인에 사용할 아이디"
                   />
                   <UserIcon className="absolute left-4 top-3.5 w-5 h-5 text-blue-200" />
+                </div>
+              </motion.div>
+
+              {/* 닉네임 입력 */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.55 }}
+              >
+                <label htmlFor="nickname" className="block text-sm font-medium text-white mb-2">
+                  닉네임 <span className="text-red-300">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    id="nickname"
+                    name="nickname"
+                    value={formData.nickname}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-12 pr-4 py-3 bg-purple-800 bg-opacity-50 border border-purple-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                    placeholder="대시보드에 표시될 닉네임"
+                  />
+                  <IdentificationIcon className="absolute left-4 top-3.5 w-5 h-5 text-blue-200" />
+                </div>
+              </motion.div>
+
+              {/* 이름과 성 - 2열 배치 */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.6 }}
+                >
+                  <label htmlFor="firstName" className="block text-sm font-medium text-white mb-2">
+                    이름
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleChange}
+                      className="w-full pl-4 pr-4 py-3 bg-purple-800 bg-opacity-50 border border-purple-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                      placeholder="이름"
+                    />
+                  </div>
+                </motion.div>
+                
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ duration: 0.5, delay: 0.65 }}
+                >
+                  <label htmlFor="lastName" className="block text-sm font-medium text-white mb-2">
+                    성
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleChange}
+                      className="w-full pl-4 pr-4 py-3 bg-purple-800 bg-opacity-50 border border-purple-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                      placeholder="성"
+                    />
+                  </div>
+                </motion.div>
+              </div>
+
+              {/* 이메일 입력 */}
+              <motion.div
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5, delay: 0.7 }}
+              >
+                <label htmlFor="email" className="block text-sm font-medium text-white mb-2">
+                  이메일 <span className="text-red-300">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                    className="w-full pl-12 pr-4 py-3 bg-purple-800 bg-opacity-50 border border-purple-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                    placeholder="example@email.com"
+                  />
+                  <EnvelopeIcon className="absolute left-4 top-3.5 w-5 h-5 text-blue-200" />
                 </div>
               </motion.div>
 
@@ -281,10 +452,10 @@ export default function SignupPage() {
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
+                transition={{ duration: 0.5, delay: 0.75 }}
               >
                 <label htmlFor="password" className="block text-sm font-medium text-white mb-2">
-                  {t('password')}
+                  비밀번호 <span className="text-red-300">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -311,16 +482,31 @@ export default function SignupPage() {
                     )}
                   </button>
                 </div>
+                
+                {/* 비밀번호 강도 표시기 */}
+                {formData.password && (
+                  <div className="mt-2">
+                    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${strengthColors[passwordStrength]} transition-all duration-300`} 
+                        style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-blue-200 mt-1">
+                      비밀번호 강도: {strengthTexts[passwordStrength]}
+                    </p>
+                  </div>
+                )}
               </motion.div>
 
               {/* 비밀번호 확인 */}
               <motion.div
                 initial={{ opacity: 0, x: -20 }}
                 animate={{ opacity: 1, x: 0 }}
-                transition={{ duration: 0.5, delay: 0.7 }}
+                transition={{ duration: 0.5, delay: 0.8 }}
               >
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-white mb-2">
-                  {t('confirm_password')}
+                  비밀번호 확인 <span className="text-red-300">*</span>
                 </label>
                 <div className="relative">
                   <input
@@ -354,7 +540,7 @@ export default function SignupPage() {
               {/* 회원가입 버튼 */}
               <motion.button
                 type="submit"
-                disabled={isLoading || !formData.username || !formData.password || !formData.confirmPassword || formData.password !== formData.confirmPassword}
+                disabled={isLoading || !formData.username || !formData.nickname || !formData.email || !formData.password || !formData.confirmPassword || formData.password !== formData.confirmPassword}
                 whileHover={{ scale: 1.03 }}
                 whileTap={{ scale: 0.97 }}
                 initial={{ opacity: 0, y: 20 }}
@@ -362,7 +548,7 @@ export default function SignupPage() {
                 transition={{ 
                   type: "spring", 
                   duration: 0.5, 
-                  delay: 0.8,
+                  delay: 0.9,
                   stiffness: 500,
                   damping: 15
                 }}
@@ -384,7 +570,7 @@ export default function SignupPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
+              transition={{ duration: 0.5, delay: 1 }}
               className="mt-6 text-center"
             >
               <p className="text-blue-200">
@@ -402,7 +588,7 @@ export default function SignupPage() {
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              transition={{ duration: 0.5, delay: 1 }}
+              transition={{ duration: 0.5, delay: 1.1 }}
               className="mt-4 text-center"
             >
               <Link
