@@ -13,12 +13,23 @@ import {
   CalculatorIcon,
   BellIcon,
   PlusIcon,
-  ChartBarIcon
+  ChartBarIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline'
 import toast, { Toaster } from 'react-hot-toast'
 
 export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true)
+
+  // 로그아웃 핸들러
+  const handleLogout = (e: React.MouseEvent) => {
+    e.preventDefault()
+    // 로그아웃 로직 구현
+    toast.success('로그아웃 되었습니다')
+    setTimeout(() => {
+      window.location.href = '/login'
+    }, 1500)
+  }
 
   useEffect(() => {
     // 시뮬레이션된 로딩
@@ -46,6 +57,19 @@ export default function DashboardPage() {
           {/* 로고 */}
           <div className="flex items-center justify-center h-16 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
             <h1 className="text-xl font-bold">태국 이관 시스템</h1>
+          </div>
+          
+          {/* 사용자 정보 */}
+          <div className="p-4 border-b border-gray-200">
+            <div className="flex items-center">
+              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-3">
+                A
+              </div>
+              <div>
+                <div className="text-sm font-medium text-gray-900">관리자</div>
+                <div className="text-xs text-gray-500">admin@system.com</div>
+              </div>
+            </div>
           </div>
 
           {/* 메뉴 */}
@@ -83,6 +107,17 @@ export default function DashboardPage() {
               관리자 패널
             </Link>
           </nav>
+          
+          {/* 로그아웃 버튼 */}
+          <div className="px-4 py-4 border-t border-gray-200">
+            <button
+              onClick={handleLogout}
+              className="w-full flex items-center px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200"
+            >
+              <ArrowRightOnRectangleIcon className="w-5 h-5 mr-3" />
+              로그아웃
+            </button>
+          </div>
         </div>
       </div>
 
