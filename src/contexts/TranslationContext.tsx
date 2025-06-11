@@ -37,7 +37,18 @@ const basicTranslations: Record<Language, Record<string, string>> = {
     'signup_button': '회원가입',
     'signup_loading': '가입 중...',
     'have_account': '이미 계정이 있으신가요?',
-    'login': '로그인'
+    'login': '로그인',
+    'welcome': '환영합니다',
+    'app_name': '태국 이관 시스템',
+    'intro_subtitle': '태국 생산 공장과의 효율적인 제품 이관 관리 시스템입니다.',
+    'get_started': '시작하기',
+    'dashboard': '대시보드',
+    'feature_realtime_tracking': '실시간 추적',
+    'feature_realtime_desc': '태국 공장의 생산품 현황을 실시간으로 모니터링하세요.',
+    'feature_cost_calculation': '원가 계산',
+    'feature_cost_desc': '이관 제품의 원가를 정확하게 계산하고 관리합니다.',
+    'feature_integrated_management': '통합 관리',
+    'feature_integrated_desc': '모든 이관 공정을 한 곳에서 효율적으로 관리하세요.'
   },
   th: {
     'login_title': 'เข้าสู่ระบบ',
@@ -61,7 +72,18 @@ const basicTranslations: Record<Language, Record<string, string>> = {
     'signup_button': 'สมัครสมาชิก',
     'signup_loading': 'กำลังสมัคร...',
     'have_account': 'มีบัญชีอยู่แล้วใช่ไหม?',
-    'login': 'เข้าสู่ระบบ'
+    'login': 'เข้าสู่ระบบ',
+    'welcome': 'ยินดีต้อนรับ',
+    'app_name': 'ระบบการถ่ายโอนไทย',
+    'intro_subtitle': 'ระบบการจัดการการถ่ายโอนผลิตภัณฑ์ที่มีประสิทธิภาพกับโรงงานการผลิตในประเทศไทย',
+    'get_started': 'เริ่มต้นใช้งาน',
+    'dashboard': 'แดชบอร์ด',
+    'feature_realtime_tracking': 'การติดตามแบบเรียลไทม์',
+    'feature_realtime_desc': 'ตรวจสอบสถานะผลิตภัณฑ์จากโรงงานในประเทศไทยแบบเรียลไทม์',
+    'feature_cost_calculation': 'การคำนวณต้นทุน',
+    'feature_cost_desc': 'คำนวณและจัดการต้นทุนของผลิตภัณฑ์ที่ถ่ายโอนอย่างแม่นยำ',
+    'feature_integrated_management': 'การจัดการแบบบูรณาการ',
+    'feature_integrated_desc': 'จัดการกระบวนการถ่ายโอนทั้งหมดอย่างมีประสิทธิภาพในที่เดียว'
   },
   en: {
     'login_title': 'Login',
@@ -85,19 +107,32 @@ const basicTranslations: Record<Language, Record<string, string>> = {
     'signup_button': 'Sign Up',
     'signup_loading': 'Signing up...',
     'have_account': 'Already have an account?',
-    'login': 'Login'
+    'login': 'Login',
+    'welcome': 'Welcome',
+    'app_name': 'Thailand Transfer System',
+    'intro_subtitle': 'Efficient product transfer management system with Thailand production plants.',
+    'get_started': 'Get Started',
+    'dashboard': 'Dashboard',
+    'feature_realtime_tracking': 'Real-time Tracking',
+    'feature_realtime_desc': 'Monitor production status from Thailand plants in real-time.',
+    'feature_cost_calculation': 'Cost Calculation',
+    'feature_cost_desc': 'Calculate and manage costs of transferred products accurately.',
+    'feature_integrated_management': 'Integrated Management',
+    'feature_integrated_desc': 'Manage all transfer processes efficiently in one place.'
   }
 };
 
-// 번역 캐시
-const translationCache: Record<string, Record<Language, string>> = {
-  ...Object.fromEntries(
-    Object.entries(basicTranslations.ko).map(([key, value]) => [
-      key, 
-      { ko: value, th: basicTranslations.th[key] || key, en: basicTranslations.en[key] || key }
-    ])
-  )
-};
+// 번역 캐시 초기화 - 모든 기본 번역 데이터를 먼저 로드
+const translationCache: Record<string, Record<Language, string>> = {};
+
+// 기본 번역 데이터 캐시에 로드
+Object.keys(basicTranslations.ko).forEach(key => {
+  translationCache[key] = {
+    ko: basicTranslations.ko[key],
+    th: basicTranslations.th[key] || key,
+    en: basicTranslations.en[key] || key
+  };
+});
 
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('ko')
@@ -168,7 +203,9 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
     }
 
     // 캐시에 없으면 서버에서 로드 시도
-    loadTranslations([key])
+    setTimeout(() => {
+      loadTranslations([key])
+    }, 0)
 
     // 로딩 중에는 키 자체를 반환
     return key

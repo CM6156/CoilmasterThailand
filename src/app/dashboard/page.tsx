@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   HomeIcon,
   UserGroupIcon,
@@ -17,14 +18,26 @@ import {
   ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline'
 import toast, { Toaster } from 'react-hot-toast'
+import { useAuth } from '@/contexts/AuthContext'
+import { useTranslation } from '@/contexts/TranslationContext'
 
 export default function DashboardPage() {
+  const { user, logout, isAuthenticated, isLoading: authLoading } = useAuth()
+  const { t, language, setLanguage } = useTranslation()
   const [isLoading, setIsLoading] = useState(true)
-  const [language, setLanguage] = useState('ko') // 초기 언어 설정: 한국어
-  const [isLanguageOpen, setIsLanguageOpen] = useState(false) // 언어 드롭다운 열림/닫힘 상태
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false)
+  const [activeTab, setActiveTab] = useState('overview')
+  const router = useRouter()
+
+  // 로그인되지 않은 경우 리디렉션
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/login')
+    }
+  }, [authLoading, isAuthenticated, router])
 
   // 언어 변경 핸들러
-  const handleLanguageChange = (lang: string) => {
+  const handleLanguageChange = (lang: 'ko' | 'th' | 'en') => {
     setLanguage(lang)
     setIsLanguageOpen(false)
     toast.success(`언어가 ${lang === 'ko' ? '한국어' : lang === 'th' ? '태국어' : '영어'}로 변경되었습니다`)
@@ -33,11 +46,8 @@ export default function DashboardPage() {
   // 로그아웃 핸들러
   const handleLogout = (e: React.MouseEvent) => {
     e.preventDefault()
-    // 로그아웃 로직 구현
+    logout()
     toast.success('로그아웃 되었습니다')
-    setTimeout(() => {
-      window.location.href = '/login'
-    }, 1500)
   }
 
   useEffect(() => {
@@ -45,7 +55,7 @@ export default function DashboardPage() {
     setTimeout(() => setIsLoading(false), 1000)
   }, [])
 
-  if (isLoading) {
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
         <div className="text-center">
@@ -54,6 +64,41 @@ export default function DashboardPage() {
         </div>
       </div>
     )
+  }
+
+  // 로그인되지 않은 경우 처리
+  if (!isAuthenticated || !user) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 flex items-center justify-center">
+        <div className="text-center bg-white bg-opacity-10 p-8 rounded-lg backdrop-blur-sm">
+          <p className="text-white font-medium mb-4">로그인이 필요합니다</p>
+          <button 
+            onClick={() => router.push('/login')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+          >
+            로그인 페이지로 이동
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // 첫 글자를 대문자로 변환하는 헬퍼 함수
+  const capitalizeFirstLetter = (string: string) => {
+    return string.charAt(0).toUpperCase() + string.slice(1)
+  }
+
+  // 프로필 이미지 초기 글자 생성
+  const getInitials = () => {
+    if (!user) return '';
+    
+    if (user.name && user.name.length > 0) {
+      return user.name.charAt(0).toUpperCase();
+    }
+    if (user.username && user.username.length > 0) {
+      return user.username.charAt(0).toUpperCase();
+    }
+    return 'U'; // 기본값
   }
 
   return (
@@ -72,11 +117,11 @@ export default function DashboardPage() {
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold mr-3">
-                A
+                {getInitials()}
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-900">관리자</div>
-                <div className="text-xs text-gray-500">admin@system.com</div>
+                <div className="text-sm font-medium text-gray-900">{user?.name || user?.username}</div>
+                <div className="text-xs text-gray-500">{user?.email}</div>
               </div>
             </div>
           </div>
@@ -111,10 +156,12 @@ export default function DashboardPage() {
               <CalculatorIcon className="w-5 h-5 mr-3" />
               원가 계산
             </Link>
-            <Link href="/admin" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
-              <ChartBarIcon className="w-5 h-5 mr-3" />
-              관리자 패널
-            </Link>
+            {user?.role === 'admin' && (
+              <Link href="/admin" className="flex items-center px-4 py-2 text-gray-700 hover:bg-blue-50 hover:text-blue-600 rounded-lg transition-all duration-200">
+                <ChartBarIcon className="w-5 h-5 mr-3" />
+                관리자 패널
+              </Link>
+            )}
           </nav>
           
           {/* 로그아웃 버튼 */}
@@ -134,7 +181,14 @@ export default function DashboardPage() {
       <div className="ml-64">
         {/* 헤더 */}
         <div className="flex justify-between items-center p-4 border-b border-gray-100">
-          <div></div> {/* 빈 공간으로 오른쪽 정렬 유지 */}
+          <div className="flex items-center">
+            <span className="text-gray-700 font-medium">{t('welcome')}, {user?.name || user?.username}!</span>
+            {user?.role === 'admin' && (
+              <span className="ml-2 px-2 py-1 text-xs font-medium bg-blue-100 text-blue-700 rounded-full">
+                관리자
+              </span>
+            )}
+          </div>
           
           {/* 언어 선택 드롭다운 */}
           <div className="relative">
@@ -176,6 +230,37 @@ export default function DashboardPage() {
         </div>
         
         <div className="p-8">
+          {/* 상단 사용자 정보 카드 */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="bg-white rounded-lg shadow-md border border-blue-100 p-6 mb-8"
+          >
+            <div className="flex flex-col md:flex-row items-center">
+              <div className="w-20 h-20 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 text-2xl font-bold mr-6">
+                {getInitials()}
+              </div>
+              <div className="mt-4 md:mt-0">
+                <h2 className="text-2xl font-bold text-blue-900">{user?.name || capitalizeFirstLetter(user?.username || '')}</h2>
+                <p className="text-blue-700">{user?.email}</p>
+                <p className="text-sm text-gray-500 mt-1">역할: {user?.role === 'admin' ? '관리자' : '일반 사용자'}</p>
+                <div className="mt-4 flex space-x-2">
+                  <button className="px-4 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100">
+                    프로필 수정
+                  </button>
+                  <button className="px-4 py-2 bg-blue-50 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-100">
+                    비밀번호 변경
+                  </button>
+                </div>
+              </div>
+              <div className="md:ml-auto mt-4 md:mt-0 flex flex-col items-end">
+                <div className="text-sm text-gray-500">마지막 로그인</div>
+                <div className="text-blue-700 font-medium">{new Date().toLocaleDateString()}</div>
+              </div>
+            </div>
+          </motion.div>
+
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-blue-900 mb-2">대시보드</h1>
             <p className="text-blue-700 font-medium">태국 이관 제품 관리 시스템 전체 현황</p>
@@ -332,7 +417,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-blue-900 font-semibold">
-                        🆕 admin님이 새로운 제품을 등록했습니다: 스마트폰 케이스
+                        🆕 {user?.name || user?.username}님이 새로운 제품을 등록했습니다: 스마트폰 케이스
                       </p>
                     </div>
                   </div>
@@ -354,7 +439,7 @@ export default function DashboardPage() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm text-blue-700">
-                        🆕 user님이 새로운 공정을 등록했습니다: 마감 처리
+                        🆕 {user?.role === 'admin' ? '관리자' : '사용자'}님이 새로운 공정을 등록했습니다: 마감 처리
                       </p>
                     </div>
                   </div>

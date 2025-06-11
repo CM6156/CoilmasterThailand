@@ -7,9 +7,11 @@ import { useRouter } from 'next/navigation'
 import { EyeIcon, EyeSlashIcon, UserIcon, LockClosedIcon } from '@heroicons/react/24/outline'
 import toast, { Toaster } from 'react-hot-toast'
 import { useTranslation } from '@/contexts/TranslationContext'
+import { useAuth } from '@/contexts/AuthContext'
 
 export default function LoginPage() {
   const { t, language, setLanguage } = useTranslation()
+  const { login, isAuthenticated } = useAuth()
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -19,6 +21,13 @@ export default function LoginPage() {
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
   const [particles, setParticles] = useState<React.ReactNode[]>([])
   const router = useRouter()
+  
+  // 이미 인증된 경우 대시보드로 리디렉션
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard')
+    }
+  }, [isAuthenticated, router])
   
   useEffect(() => {
     // 페이지 로드 시 배경 애니메이션 시작
@@ -75,23 +84,15 @@ export default function LoginPage() {
     setIsLoading(true)
 
     try {
-      const response = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formData),
-      })
-
-      const data = await response.json()
-
-      if (response.ok) {
+      const success = await login(formData.username, formData.password)
+      
+      if (success) {
         toast.success('로그인 성공!')
         setTimeout(() => {
           router.push('/dashboard')
         }, 1000)
       } else {
-        toast.error(data.error || '로그인에 실패했습니다.')
+        toast.error('아이디 또는 비밀번호가 올바르지 않습니다.')
       }
     } catch (error) {
       toast.error('네트워크 오류가 발생했습니다.')
@@ -319,6 +320,12 @@ export default function LoginPage() {
                   {isLoading ? t('login_loading') : t('login_button')}
                 </span>
               </motion.button>
+              
+              {/* 테스트 계정 정보 */}
+              <div className="mt-4 text-center text-sm text-blue-200">
+                <p>테스트 계정: admin / 123456</p>
+                <p>또는 user / 123456</p>
+              </div>
             </form>
 
             {/* 회원가입 링크 */}
