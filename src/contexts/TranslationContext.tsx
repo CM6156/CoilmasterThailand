@@ -13,8 +13,91 @@ interface TranslationContextType {
 
 const TranslationContext = createContext<TranslationContextType | undefined>(undefined)
 
+// 각 언어별 기본 번역 데이터 (자주 사용되는 키들의 즉시 번역)
+const basicTranslations: Record<Language, Record<string, string>> = {
+  ko: {
+    'login_title': '로그인',
+    'login_subtitle': '태국 이관 제품 관리 시스템에 접속하세요',
+    'username': '아이디',
+    'password': '비밀번호',
+    'username_placeholder': '아이디를 입력하세요',
+    'password_placeholder': '비밀번호를 입력하세요',
+    'login_button': '로그인',
+    'login_loading': '로그인 중...',
+    'no_account': '계정이 없으신가요?',
+    'signup': '회원가입',
+    'back_to_home': '홈으로 돌아가기',
+    'signup_title': '회원가입',
+    'signup_subtitle': '태국 이관 제품 관리 시스템 계정을 생성하세요',
+    'username_min': '아이디를 입력하세요 (3자 이상)',
+    'password_min': '비밀번호를 입력하세요 (6자 이상)',
+    'confirm_password': '비밀번호 확인',
+    'confirm_password_placeholder': '비밀번호를 다시 입력하세요',
+    'password_mismatch': '비밀번호가 일치하지 않습니다.',
+    'signup_button': '회원가입',
+    'signup_loading': '가입 중...',
+    'have_account': '이미 계정이 있으신가요?',
+    'login': '로그인'
+  },
+  th: {
+    'login_title': 'เข้าสู่ระบบ',
+    'login_subtitle': 'เข้าถึงระบบการถ่ายโอนไทย',
+    'username': 'ชื่อผู้ใช้',
+    'password': 'รหัสผ่าน',
+    'username_placeholder': 'ป้อนชื่อผู้ใช้ของคุณ',
+    'password_placeholder': 'ป้อนรหัสผ่านของคุณ',
+    'login_button': 'เข้าสู่ระบบ',
+    'login_loading': 'กำลังเข้าสู่ระบบ...',
+    'no_account': 'ยังไม่มีบัญชีใช่ไหม?',
+    'signup': 'สมัครสมาชิก',
+    'back_to_home': 'กลับไปหน้าแรก',
+    'signup_title': 'สมัครสมาชิก',
+    'signup_subtitle': 'สร้างบัญชีสำหรับระบบการถ่ายโอนไทย',
+    'username_min': 'ป้อนชื่อผู้ใช้ของคุณ (อย่างน้อย 3 ตัวอักษร)',
+    'password_min': 'ป้อนรหัสผ่านของคุณ (อย่างน้อย 6 ตัวอักษร)',
+    'confirm_password': 'ยืนยันรหัสผ่าน',
+    'confirm_password_placeholder': 'ป้อนรหัสผ่านของคุณอีกครั้ง',
+    'password_mismatch': 'รหัสผ่านไม่ตรงกัน',
+    'signup_button': 'สมัครสมาชิก',
+    'signup_loading': 'กำลังสมัคร...',
+    'have_account': 'มีบัญชีอยู่แล้วใช่ไหม?',
+    'login': 'เข้าสู่ระบบ'
+  },
+  en: {
+    'login_title': 'Login',
+    'login_subtitle': 'Access the Thailand Transfer System',
+    'username': 'Username',
+    'password': 'Password',
+    'username_placeholder': 'Enter your username',
+    'password_placeholder': 'Enter your password',
+    'login_button': 'Login',
+    'login_loading': 'Logging in...',
+    'no_account': 'Don\'t have an account?',
+    'signup': 'Sign Up',
+    'back_to_home': 'Back to Home',
+    'signup_title': 'Sign Up',
+    'signup_subtitle': 'Create an account for Thailand Transfer System',
+    'username_min': 'Enter your username (min. 3 characters)',
+    'password_min': 'Enter your password (min. 6 characters)',
+    'confirm_password': 'Confirm Password',
+    'confirm_password_placeholder': 'Re-enter your password',
+    'password_mismatch': 'Passwords do not match.',
+    'signup_button': 'Sign Up',
+    'signup_loading': 'Signing up...',
+    'have_account': 'Already have an account?',
+    'login': 'Login'
+  }
+};
+
 // 번역 캐시
-const translationCache: Record<string, Record<Language, string>> = {}
+const translationCache: Record<string, Record<Language, string>> = {
+  ...Object.fromEntries(
+    Object.entries(basicTranslations.ko).map(([key, value]) => [
+      key, 
+      { ko: value, th: basicTranslations.th[key] || key, en: basicTranslations.en[key] || key }
+    ])
+  )
+};
 
 export function TranslationProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<Language>('ko')
@@ -74,7 +157,12 @@ export function TranslationProvider({ children }: { children: React.ReactNode })
 
   // 번역 함수
   const t = useCallback((key: string): string => {
-    // 캐시에서 먼저 확인
+    // 로컬 기본 번역 데이터에서 확인
+    if (basicTranslations[language] && basicTranslations[language][key]) {
+      return basicTranslations[language][key];
+    }
+    
+    // 캐시에서 확인
     if (translationCache[key] && translationCache[key][language]) {
       return translationCache[key][language]
     }

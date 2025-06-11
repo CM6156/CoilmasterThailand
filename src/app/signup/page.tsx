@@ -245,7 +245,7 @@ export default function SignupPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white border-opacity-20"
+            className="bg-purple-900 bg-opacity-50 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-purple-400 border-opacity-30"
           >
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* 아이디 입력 */}
@@ -266,7 +266,7 @@ export default function SignupPage() {
                     onChange={handleChange}
                     required
                     minLength={3}
-                    className="w-full pl-12 pr-4 py-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-3 bg-purple-800 bg-opacity-50 border border-purple-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
                     placeholder={t('username_min')}
                   />
                   <UserIcon className="absolute left-4 top-3.5 w-5 h-5 text-blue-200" />
@@ -291,7 +291,7 @@ export default function SignupPage() {
                     onChange={handleChange}
                     required
                     minLength={6}
-                    className="w-full pl-12 pr-12 py-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                    className="w-full pl-12 pr-12 py-3 bg-purple-800 bg-opacity-50 border border-purple-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
                     placeholder={t('password_min')}
                   />
                   <LockClosedIcon className="absolute left-4 top-3.5 w-5 h-5 text-blue-200" />
@@ -326,7 +326,7 @@ export default function SignupPage() {
                     value={formData.confirmPassword}
                     onChange={handleChange}
                     required
-                    className="w-full pl-12 pr-12 py-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                    className="w-full pl-12 pr-12 py-3 bg-purple-800 bg-opacity-50 border border-purple-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
                     placeholder={t('confirm_password_placeholder')}
                   />
                   <LockClosedIcon className="absolute left-4 top-3.5 w-5 h-5 text-blue-200" />

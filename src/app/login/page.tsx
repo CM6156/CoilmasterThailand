@@ -226,7 +226,7 @@ export default function LoginPage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-white border-opacity-20"
+            className="bg-blue-900 bg-opacity-50 backdrop-blur-md rounded-2xl p-8 shadow-2xl border border-blue-400 border-opacity-30"
           >
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* 아이디 입력 */}
@@ -246,7 +246,7 @@ export default function LoginPage() {
                     value={formData.username}
                     onChange={handleChange}
                     required
-                    className="w-full pl-12 pr-4 py-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                    className="w-full pl-12 pr-4 py-3 bg-blue-800 bg-opacity-50 border border-blue-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
                     placeholder={t('username_placeholder')}
                   />
                   <UserIcon className="absolute left-4 top-3.5 w-5 h-5 text-blue-200" />
@@ -270,7 +270,7 @@ export default function LoginPage() {
                     value={formData.password}
                     onChange={handleChange}
                     required
-                    className="w-full pl-12 pr-12 py-3 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-white focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
+                    className="w-full pl-12 pr-12 py-3 bg-blue-800 bg-opacity-50 border border-blue-300 border-opacity-50 rounded-lg text-white placeholder-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 focus:border-transparent transition-all duration-300"
                     placeholder={t('password_placeholder')}
                   />
                   <LockClosedIcon className="absolute left-4 top-3.5 w-5 h-5 text-blue-200" />
