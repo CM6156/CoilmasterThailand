@@ -137,24 +137,58 @@ export function usePageTranslations(keys: string[]) {
 // 언어 선택기 컴포넌트
 export function LanguageSelector() {
   const { language, setLanguage } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
 
-  const languages: { code: Language, name: string, flag: string }[] = [
-    { code: 'ko', name: '한국어', flag: '🇰🇷' },
-    { code: 'th', name: 'ไทย', flag: '🇹🇭' },
-    { code: 'en', name: 'English', flag: '🇺🇸' }
+  const languages: { code: Language, name: string, flag: string, localName: string }[] = [
+    { code: 'ko', name: '한국어', localName: '한국어', flag: '🇰🇷' },
+    { code: 'th', name: '태국어', localName: 'ไทย', flag: '🇹🇭' },
+    { code: 'en', name: '영어', localName: 'English', flag: '🇺🇸' }
   ]
 
+  const currentLanguage = languages.find(lang => lang.code === language) || languages[0]
+
+  const handleSelectLanguage = (code: Language) => {
+    setLanguage(code)
+    setIsOpen(false)
+  }
+
   return (
-    <select 
-      value={language} 
-      onChange={(e) => setLanguage(e.target.value as Language)}
-      className="px-3 py-1 border border-gray-300 rounded-md text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-    >
-      {languages.map((lang) => (
-        <option key={lang.code} value={lang.code}>
-          {lang.flag} {lang.name}
-        </option>
-      ))}
-    </select>
+    <div className="relative inline-block text-left">
+      <div>
+        <button
+          type="button"
+          className="inline-flex items-center justify-center w-full px-3 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          <span className="mr-1">{currentLanguage.flag}</span>
+          <span className="mr-1">{currentLanguage.localName}</span>
+          <svg className="w-4 h-4 ml-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+            <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+          </svg>
+        </button>
+      </div>
+
+      {isOpen && (
+        <div className="absolute right-0 mt-2 w-40 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 z-50">
+          <div className="py-1" role="menu" aria-orientation="vertical">
+            {languages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => handleSelectLanguage(lang.code)}
+                className={`flex items-center w-full px-4 py-2 text-sm text-left ${
+                  language === lang.code 
+                    ? 'bg-blue-50 text-blue-700' 
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+                role="menuitem"
+              >
+                <span className="mr-2">{lang.flag}</span>
+                <span>{lang.localName}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 } 
