@@ -17,11 +17,43 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
+  const [particles, setParticles] = useState<React.ReactNode[]>([])
   const router = useRouter()
   
   useEffect(() => {
     // 페이지 로드 시 배경 애니메이션 시작
     document.body.classList.add('login-animation-active')
+    
+    // 파티클 생성 - 클라이언트에서만 실행
+    const generateParticles = Array.from({ length: 50 }).map((_, i) => (
+      <motion.div
+        key={i}
+        className="absolute bg-white rounded-full opacity-0"
+        initial={{ 
+          x: Math.random() * window.innerWidth, 
+          y: Math.random() * window.innerHeight,
+          scale: 0 
+        }}
+        animate={{ 
+          scale: [0, Math.random() * 0.5 + 0.5, 0],
+          opacity: [0, Math.random() * 0.5, 0],
+          x: `calc(${Math.random() * 100}vw)`,
+          y: `calc(${Math.random() * 100}vh)`,
+        }}
+        transition={{
+          duration: Math.random() * 10 + 10,
+          repeat: Infinity,
+          delay: Math.random() * 5,
+        }}
+        style={{ 
+          width: `${Math.random() * 10 + 2}px`, 
+          height: `${Math.random() * 10 + 2}px` 
+        }}
+      />
+    ))
+    
+    setParticles(generateParticles)
+    
     return () => document.body.classList.remove('login-animation-active')
   }, [])
 
@@ -67,34 +99,6 @@ export default function LoginPage() {
       setIsLoading(false)
     }
   }
-
-  // 배경 효과를 위한 파티클 생성
-  const particles = Array.from({ length: 50 }).map((_, i) => (
-    <motion.div
-      key={i}
-      className="absolute bg-white rounded-full opacity-0"
-      initial={{ 
-        x: Math.random() * window.innerWidth, 
-        y: Math.random() * window.innerHeight,
-        scale: 0 
-      }}
-      animate={{ 
-        scale: [0, Math.random() * 0.5 + 0.5, 0],
-        opacity: [0, Math.random() * 0.5, 0],
-        x: `calc(${Math.random() * 100}vw)`,
-        y: `calc(${Math.random() * 100}vh)`,
-      }}
-      transition={{
-        duration: Math.random() * 10 + 10,
-        repeat: Infinity,
-        delay: Math.random() * 5,
-      }}
-      style={{ 
-        width: `${Math.random() * 10 + 2}px`, 
-        height: `${Math.random() * 10 + 2}px` 
-      }}
-    />
-  ))
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 flex items-center justify-center px-4 relative overflow-hidden">
