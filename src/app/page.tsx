@@ -46,6 +46,16 @@ const TypeWriter = ({ text, delay = 0 }: { text: string; delay?: number }) => {
 
 // 떠다니는 파티클 컴포넌트
 const FloatingParticle = ({ delay }: { delay: number }) => {
+  const [position, setPosition] = useState({ left: 0, top: 0 })
+  
+  useEffect(() => {
+    // 클라이언트에서만 랜덤 위치 계산
+    setPosition({
+      left: Math.random() * 100,
+      top: Math.random() * 100
+    })
+  }, [])
+  
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0 }}
@@ -63,8 +73,8 @@ const FloatingParticle = ({ delay }: { delay: number }) => {
       }}
       className="absolute w-2 h-2 bg-white rounded-full"
       style={{
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`
+        left: `${position.left}%`,
+        top: `${position.top}%`
       }}
     />
   )
@@ -81,6 +91,20 @@ const Feature3DCard = ({ icon: Icon, title, description, delay }: {
   const [rotateX, setRotateX] = useState(0)
   const [rotateY, setRotateY] = useState(0)
   const [isHovered, setIsHovered] = useState(false)
+  const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, delay: number}>>([])
+  
+  // 클라이언트에서만 파티클 생성
+  useEffect(() => {
+    if (isHovered) {
+      const newParticles = Array.from({ length: 10 }).map((_, i) => ({
+        id: i,
+        x: 50 + Math.random() * 50 * (Math.random() > 0.5 ? 1 : -1),
+        y: 50 + Math.random() * 50 * (Math.random() > 0.5 ? 1 : -1),
+        delay: i * 0.1
+      }))
+      setParticles(newParticles)
+    }
+  }, [isHovered])
   
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (!cardRef.current) return
@@ -130,17 +154,17 @@ const Feature3DCard = ({ icon: Icon, title, description, delay }: {
       {/* 호버 시 파티클 효과 */}
       {isHovered && (
         <>
-          {[...Array(10)].map((_, i) => (
+          {particles.map((particle) => (
             <motion.div
-              key={i}
+              key={particle.id}
               initial={{ opacity: 0, scale: 0, x: '50%', y: '50%' }}
               animate={{ 
                 opacity: [0, 0.8, 0],
                 scale: [0, 1, 0],
-                x: `${50 + Math.random() * 50 * (Math.random() > 0.5 ? 1 : -1)}%`,
-                y: `${50 + Math.random() * 50 * (Math.random() > 0.5 ? 1 : -1)}%`
+                x: `${particle.x}%`,
+                y: `${particle.y}%`
               }}
-              transition={{ duration: 1, delay: i * 0.1 }}
+              transition={{ duration: 1, delay: particle.delay }}
               className="absolute w-1 h-1 bg-white rounded-full"
             />
           ))}
@@ -185,10 +209,25 @@ export default function Home() {
   const [showContent, setShowContent] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
   const [isLanguageOpen, setIsLanguageOpen] = useState(false)
+  const [stars, setStars] = useState<Array<{id: number, width: number, height: number, left: number, top: number, duration: number, delay: number}>>([])
   
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 500)
     return () => clearTimeout(timer)
+  }, [])
+
+  // 클라이언트에서만 별 생성
+  useEffect(() => {
+    const generatedStars = Array.from({ length: 100 }).map((_, i) => ({
+      id: i,
+      width: Math.random() * 2 + 1,
+      height: Math.random() * 2 + 1,
+      left: Math.random() * 100,
+      top: Math.random() * 100,
+      duration: Math.random() * 3 + 2,
+      delay: Math.random() * 5
+    }))
+    setStars(generatedStars)
   }, [])
 
   const steps = ['고객', '제품', '공정', '설비', '원자재']
@@ -301,24 +340,24 @@ export default function Home() {
         ))}
         
         {/* 미세한 별빛 효과 */}
-        {Array.from({ length: 100 }).map((_, i) => (
+        {stars.map((star) => (
           <motion.div
-            key={`star-${i}`}
+            key={`star-${star.id}`}
             className="absolute bg-white rounded-full"
             style={{
-              width: Math.random() * 2 + 1 + 'px',
-              height: Math.random() * 2 + 1 + 'px',
-              left: Math.random() * 100 + '%',
-              top: Math.random() * 100 + '%',
+              width: star.width + 'px',
+              height: star.height + 'px',
+              left: star.left + '%',
+              top: star.top + '%',
             }}
             animate={{
               opacity: [0.2, 0.8, 0.2],
               scale: [1, 1.2, 1],
             }}
             transition={{
-              duration: Math.random() * 3 + 2,
+              duration: star.duration,
               repeat: Infinity,
-              delay: Math.random() * 5,
+              delay: star.delay,
             }}
           />
         ))}
