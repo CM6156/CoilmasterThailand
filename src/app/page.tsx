@@ -12,6 +12,7 @@ import {
   TruckIcon,
   BeakerIcon
 } from '@heroicons/react/24/outline'
+import toast, { Toaster } from 'react-hot-toast'
 
 // 텍스트 타이핑 애니메이션 컴포넌트
 const TypeWriter = ({ text, delay = 0 }: { text: string; delay?: number }) => {
@@ -125,6 +126,15 @@ const FeatureCard = ({ icon: Icon, title, description, delay }: {
 export default function Home() {
   const [showContent, setShowContent] = useState(false)
   const [currentStep, setCurrentStep] = useState(0)
+  const [language, setLanguage] = useState('ko') // 초기 언어 설정: 한국어
+  const [isLanguageOpen, setIsLanguageOpen] = useState(false) // 언어 드롭다운 열림/닫힘 상태
+
+  // 언어 변경 핸들러
+  const handleLanguageChange = (lang: string) => {
+    setLanguage(lang)
+    setIsLanguageOpen(false)
+    toast.success(`언어가 ${lang === 'ko' ? '한국어' : lang === 'th' ? '태국어' : '영어'}로 변경되었습니다`)
+  }
 
   useEffect(() => {
     const timer = setTimeout(() => setShowContent(true), 500)
@@ -142,6 +152,48 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 relative overflow-hidden">
+      <Toaster position="top-center" />
+      
+      {/* 언어 선택 드롭다운 (오른쪽 상단 고정) */}
+      <div className="absolute top-4 right-4 z-50">
+        <div className="relative">
+          <button 
+            className="flex items-center px-3 py-2 border border-white border-opacity-30 rounded-md text-sm font-medium text-white bg-black bg-opacity-20 hover:bg-opacity-30 backdrop-blur-sm"
+            onClick={() => setIsLanguageOpen(!isLanguageOpen)}
+          >
+            {language === 'ko' ? '한국어' : language === 'th' ? 'ไทย' : 'English'}
+            <svg className="ml-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
+            </svg>
+          </button>
+          
+          {isLanguageOpen && (
+            <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-50 backdrop-blur-md">
+              <div className="py-1" role="menu" aria-orientation="vertical">
+                <button
+                  className={`block w-full text-left px-4 py-2 text-sm ${language === 'ko' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                  onClick={() => handleLanguageChange('ko')}
+                >
+                  한국어
+                </button>
+                <button
+                  className={`block w-full text-left px-4 py-2 text-sm ${language === 'th' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                  onClick={() => handleLanguageChange('th')}
+                >
+                  ไทย (태국어)
+                </button>
+                <button
+                  className={`block w-full text-left px-4 py-2 text-sm ${language === 'en' ? 'bg-blue-50 text-blue-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                  onClick={() => handleLanguageChange('en')}
+                >
+                  English (영어)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+      
       {/* 화려한 배경 애니메이션 */}
       <div className="absolute inset-0 overflow-hidden">
         {/* 메인 그라데이션 볼들 */}
