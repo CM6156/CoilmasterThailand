@@ -143,7 +143,7 @@ const Feature3DCard = ({ icon: Icon, title, description, delay }: {
       onMouseMove={handleMouseMove}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={handleMouseLeave}
-      className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 text-white relative overflow-hidden group"
+      className="bg-blue-900 bg-opacity-60 backdrop-blur-lg rounded-2xl p-8 text-white relative overflow-hidden group border border-blue-400 border-opacity-30 shadow-lg"
     >
       {/* 호버 시 그라데이션 효과 */}
       <motion.div
@@ -176,7 +176,7 @@ const Feature3DCard = ({ icon: Icon, title, description, delay }: {
         initial={{ scale: 0 }}
         animate={{ scale: 1 }}
         transition={{ duration: 0.5, delay: delay + 0.2 }}
-        className="w-16 h-16 bg-white bg-opacity-20 rounded-full flex items-center justify-center mb-6 mx-auto relative z-10"
+        className="w-16 h-16 bg-blue-700 bg-opacity-70 rounded-full flex items-center justify-center mb-6 mx-auto relative z-10 border border-blue-300 border-opacity-50"
       >
         <Icon className="w-8 h-8 text-white" />
       </motion.div>
@@ -403,7 +403,7 @@ export default function Home() {
                     <motion.button
                       whileHover={{ scale: 1.05, y: -5 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transform transition-all duration-300 flex items-center justify-center"
+                      className="px-8 py-4 bg-gradient-to-r from-blue-500 to-indigo-600 text-white font-semibold rounded-lg hover:shadow-lg transform transition-all duration-300 flex items-center justify-center shadow-md"
                     >
                       <span>{t('get_started')}</span>
                       <ArrowRightIcon className="w-5 h-5 ml-2" />
@@ -414,7 +414,7 @@ export default function Home() {
                     <motion.button
                       whileHover={{ scale: 1.05, y: -5 }}
                       whileTap={{ scale: 0.95 }}
-                      className="px-8 py-4 bg-white bg-opacity-10 backdrop-blur-sm border border-white border-opacity-20 text-white font-semibold rounded-lg hover:bg-opacity-20 transform transition-all duration-300"
+                      className="px-8 py-4 bg-blue-700 bg-opacity-50 backdrop-blur-sm border border-blue-300 border-opacity-30 text-white font-semibold rounded-lg hover:bg-opacity-70 transform transition-all duration-300 shadow-md"
                     >
                       {t('dashboard')}
                     </motion.button>
@@ -481,7 +481,7 @@ export default function Home() {
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
-                  className="bg-white bg-opacity-10 backdrop-blur-sm rounded-full p-6 border border-white border-opacity-20 shadow-xl hover:shadow-2xl transform transition-all duration-300"
+                  className="bg-blue-600 bg-opacity-60 backdrop-blur-sm rounded-full p-6 border border-blue-300 border-opacity-50 shadow-xl hover:shadow-2xl transform transition-all duration-300"
                 >
                   <ArrowRightIcon className="w-8 h-8 text-white" />
                 </motion.button>
